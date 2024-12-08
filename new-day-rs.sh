@@ -22,6 +22,7 @@ fi
 # Create new crate if it doesn't exist
 if [ -d "$cargo_dir" ]; then
     echo "Warning: $cargo_dir already exists, skipping creation"
+    cd "$cargo_dir"
 else
     cargo new "$cargo_dir"
     cd "$cargo_dir"
@@ -66,15 +67,16 @@ fn main() {
 }
 EOF
 
-    # Download input if it doesn't exist
-    if [ ! -f "$input_file" ]; then
-        aoc download -o --input-file "$input_file" --input-only || {
-            echo "Error: Failed to download input file"
-            cd ..
-            rm -rf "$cargo_dir"
-            exit 1
-        }
-    fi
 fi
 
-rustrover "./$cargo_dir" &
+# Download input if it doesn't exist
+if [ ! -f "$input_file" ]; then
+    aoc download -o --input-file "$input_file" --input-only || {
+        echo "Error: Failed to download input file"
+        #cd ..
+        #rm -rf "$cargo_dir"
+        exit 1
+    }
+fi
+
+#rustrover "./$cargo_dir" &
