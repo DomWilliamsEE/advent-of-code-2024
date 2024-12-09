@@ -1,6 +1,42 @@
-use itertools::{repeat_n, Itertools};
+use common::itertools::{repeat_n, Itertools};
+use common::{solution, PartNumber, Solution, SolutionInput};
 use std::borrow::Cow;
-use std::fs;
+
+pub struct Day07_2024;
+
+impl Solution for Day07_2024 {
+    fn solve(input: &str, part: PartNumber) -> i64 {
+        match part {
+            PartNumber::Part1 => part_one(input),
+            PartNumber::Part2 => part_two(input),
+        }
+    }
+}
+solution!(
+    Day07_2024,
+    [
+        (
+            PartNumber::Part1,
+            SolutionInput::FullInput,
+            Some(2941973819040)
+        ),
+        (
+            PartNumber::Part1,
+            SolutionInput::Example(PART1_EXAMPLE),
+            Some(3749)
+        ),
+        (
+            PartNumber::Part2,
+            SolutionInput::FullInput,
+            Some(249943041417600)
+        ),
+        (
+            PartNumber::Part2,
+            SolutionInput::Example(PART1_EXAMPLE),
+            Some(11387)
+        ),
+    ]
+);
 
 const PART1_EXAMPLE: &str = "190: 10 19
 3267: 81 40 27
@@ -11,9 +47,11 @@ const PART1_EXAMPLE: &str = "190: 10 19
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20";
-// leave blank if same as part1
-const PART2_EXAMPLE: &str = "";
 
+#[test]
+fn test_build_2024_07() {}
+
+// -----
 #[derive(Debug)]
 struct Equation {
     result: i64,
@@ -122,37 +160,4 @@ fn part_two(input: &str) -> i64 {
         }
     }
     correct_sum
-}
-
-fn main() {
-    let part = 2;
-    let mut example = true;
-    example = false;
-
-    let input = if example {
-        Cow::Borrowed(if part == 1 {
-            PART1_EXAMPLE
-        } else if !PART2_EXAMPLE.is_empty() {
-            PART2_EXAMPLE
-        } else {
-            PART1_EXAMPLE
-        })
-    } else {
-        Cow::Owned(fs::read_to_string("src/day07-input").unwrap())
-    };
-
-    let result = if part == 1 {
-        part_one(&input)
-    } else {
-        part_two(&input)
-    };
-
-    println!("{}", result);
-}
-
-#[test]
-fn test_answers() {
-    let input = fs::read_to_string("src/day07-input").unwrap();
-    assert_eq!(part_one(&input), 2941973819040);
-    assert_eq!(part_two(&input), 249943041417600);
 }

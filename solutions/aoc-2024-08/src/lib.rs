@@ -1,10 +1,19 @@
+use common::itertools::Itertools;
+use common::{solution, PartNumber, Solution, SolutionInput};
 use glam::{uvec2, IVec2, UVec2};
-use itertools::Itertools;
-use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
-use std::fs;
-use std::io::Read;
 use std::str::FromStr;
+
+pub struct Day08_2024;
+
+impl Solution for Day08_2024 {
+    fn solve(input: &str, part: PartNumber) -> i64 {
+        match part {
+            PartNumber::Part1 => part_one(input),
+            PartNumber::Part2 => part_two(input),
+        }
+    }
+}
 
 const PART1_EXAMPLE: &str = "............
 ........0...
@@ -18,8 +27,27 @@ const PART1_EXAMPLE: &str = "............
 .........A..
 ............
 ............";
-// leave blank if same as part1
-const PART2_EXAMPLE: &str = "";
+
+solution!(
+    Day08_2024,
+    [
+        (PartNumber::Part1, SolutionInput::FullInput, Some(265)),
+        (
+            PartNumber::Part1,
+            SolutionInput::Example(PART1_EXAMPLE),
+            Some(14),
+        ),
+        (PartNumber::Part2, SolutionInput::FullInput, Some(962)),
+        (
+            PartNumber::Part2,
+            SolutionInput::Example(PART1_EXAMPLE),
+            Some(34),
+        ),
+    ]
+);
+
+#[test]
+fn test_build() {}
 
 struct Map {
     cells: HashMap<char, Vec<UVec2>>,
@@ -165,36 +193,4 @@ fn part_two(input: &str) -> i64 {
     // println!("END");
     print_grid(end_grid, map.dims);
     uniques.len() as i64
-}
-
-fn main() {
-    let part = 2;
-    let mut example = true;
-    example = false;
-
-    let input = if example {
-        Cow::Borrowed(if part == 1 {
-            PART1_EXAMPLE
-        } else if !PART2_EXAMPLE.is_empty() {
-            PART2_EXAMPLE
-        } else {
-            PART1_EXAMPLE
-        })
-    } else {
-        Cow::Owned(fs::read_to_string("src/day08-input").unwrap())
-    };
-
-    let result = if part == 1 {
-        part_one(&input)
-    } else {
-        part_two(&input)
-    };
-
-    println!("{}", result);
-}
-
-#[test]
-fn test_answers() {
-    assert_eq!(part_one(include_str!("day08-input")), 265);
-    assert_eq!(part_two(include_str!("day08-input")), 962);
 }

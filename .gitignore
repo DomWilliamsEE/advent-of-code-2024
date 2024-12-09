@@ -177,4 +177,5 @@ dist
 *-input
 puzzle.md
 input
-Cargo.lock
+inputs/*
+!inputs/.keep
