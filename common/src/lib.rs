@@ -115,3 +115,7 @@ pub fn run_exemplars<S: Solution>(
 
     all_passed
 }
+
+pub fn lines(input: &str) -> impl Iterator<Item = &str> {
+    input.lines().filter(|line| !line.is_empty()).map(|line| line.trim())
+}

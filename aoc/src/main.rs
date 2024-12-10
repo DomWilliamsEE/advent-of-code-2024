@@ -31,7 +31,7 @@ fn do_main() -> Result<()> {
 
     ensure_solution_built(&args).context("Failed to ensure solution is built")?;
 
-    run_solution(args, &input)?;
+    run_solution(args, input.trim_end())?;
     Ok(())
 }
 
