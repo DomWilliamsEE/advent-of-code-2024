@@ -62,6 +62,9 @@ find "$target_dir" -type f \( -name "*.rs" -o -name "*.toml" \) -exec sed -i \
     -e "s/YYYY/${year}/g" \
     -e "s/DD/${day}/g" {} +
 
+log_info "Running git add..."
+git add "$target_dir"
+
 # Create symlink to lib.rs
 log_info "Creating solution symlink..."
 if ! ln -s "${target_dir}/src/lib.rs" "${year}-${day}.rs"; then

@@ -50,6 +50,7 @@ struct Block {
     file: Option<i32>,
 }
 
+#[allow(dead_code)]
 fn fmt(blocks: &[Block]) -> String {
     let mut s = String::new();
 

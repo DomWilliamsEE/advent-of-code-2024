@@ -95,7 +95,7 @@ impl Map {
     ) -> impl Iterator<Item = UVec2> + 'a {
         self.cells
             .iter()
-            .flat_map(|(freq, cells)| cells.iter().permutations(2))
+            .flat_map(|(_, cells)| cells.iter().permutations(2))
             .flat_map(move |combo| {
                 let a = combo[0].as_ivec2();
                 let b = combo[1].as_ivec2();

@@ -1,3 +1,4 @@
 [workspace]
 resolver = "2"
 members = ["aoc", "common", "solutions/*"]
+exclude = ["solutions/aoc-YYYY-DD"]

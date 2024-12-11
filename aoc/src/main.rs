@@ -14,6 +14,7 @@ pub struct Args {
     /// All parts if not set
     pub part: Option<PartNumber>,
     pub only_solutions: bool,
+    pub exemplar: Option<u32>,
 }
 
 fn do_main() -> Result<()> {
@@ -124,9 +125,10 @@ fn run_solution(args: Args, input: &str) -> Result<()> {
                     .context("Failed to load run_exemplars_entrypoint symbol")?;
 
                 let part_filter = args.part.map(|p| p as u8).unwrap_or(0);
+                let exemplar_filter = args.exemplar.unwrap_or(0);
 
                 info!("calling run_exemplars entrypoint");
-                let res = func(input.as_ptr(), input.len(), part_filter);
+                let res = func(input.as_ptr(), input.len(), part_filter, exemplar_filter);
                 if res {
                     info!("all exemplars passed");
                 } else {
@@ -158,6 +160,7 @@ impl Args {
         let mut year = None;
         let mut part = None;
         let mut only_solutions = false;
+        let mut exemplar = None;
 
         while let Some(arg) = args.next() {
             match arg.as_str() {
@@ -183,6 +186,14 @@ impl Args {
                 "--2" => {
                     part = Some(PartNumber::Part2);
                 }
+                "--exemplar" => {
+                    exemplar = Some(
+                        args.next()
+                            .context("--exemplar requires a number")?
+                            .parse()
+                            .context("exemplar must be a valid number")?,
+                    );
+                }
                 "--only-solutions" => only_solutions = true,
                 _ => bail!("unknown argument"),
             }
@@ -193,6 +204,7 @@ impl Args {
             year: year.context("--year is required")?,
             part,
             only_solutions,
+            exemplar,
         })
     }
 }

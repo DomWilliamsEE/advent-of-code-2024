@@ -1,6 +1,5 @@
 use common::itertools::{repeat_n, Itertools};
 use common::{solution, PartNumber, Solution, SolutionInput};
-use std::borrow::Cow;
 
 pub struct Day07_2024;
 

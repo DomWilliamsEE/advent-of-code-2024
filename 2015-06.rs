@@ -1,0 +1,1 @@
+solutions/aoc-2015-06/src/lib.rs
