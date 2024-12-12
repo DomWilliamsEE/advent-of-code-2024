@@ -163,9 +163,9 @@ mod tests {
 
 mod compressed_ints_small_separately {
     use bitvec::prelude::BitVec;
-    use common::itertools::Itertools;
+
     use size_of::{Context, SizeOf};
-    use std::fmt::Debug;
+
     use std::ops::{Deref, DerefMut};
 
     #[derive(Default, SizeOf)]
