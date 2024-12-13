@@ -1,12 +1,12 @@
 use collect_array::CollectArrayResult;
-use common::itertools::Itertools;
-use common::{lines, solution, PartNumber, Solution, SolutionInput};
+
+use common::prelude::*;
 use std::collections::HashMap;
 
 pub struct Day07_2015;
 
 impl Solution for Day07_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => {
                 let mut state = State::default();
@@ -22,12 +22,10 @@ impl Solution for Day07_2015 {
         }
     }
 }
+
 solution!(
     Day07_2015,
-    [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(46065)),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(14134)),
-    ]
+    [solution_part1(Some(46065)), solution_part2(Some(14134))]
 );
 
 #[test]

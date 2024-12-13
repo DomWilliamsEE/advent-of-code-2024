@@ -1,24 +1,21 @@
-use common::itertools::Itertools;
-use common::{lines, solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use glam::{uvec2, UVec2};
 use std::str::FromStr;
 
 pub struct Day06_2015;
 
 impl Solution for Day06_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => part_one(input),
             PartNumber::Part2 => part_two(input),
         }
     }
 }
+
 solution!(
     Day06_2015,
-    [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(400410)),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(15343601)),
-    ]
+    [solution_part1(Some(400410)), solution_part2(Some(15343601))]
 );
 
 #[test]

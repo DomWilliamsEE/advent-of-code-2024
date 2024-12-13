@@ -1,12 +1,11 @@
-use common::itertools::Itertools;
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use std::collections::HashMap;
 use std::iter::repeat_n;
 
 pub struct Day09_2024;
 
 impl Solution for Day09_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         assert_eq!(input.lines().count(), 1);
 
         match part {
@@ -19,26 +18,10 @@ impl Solution for Day09_2024 {
 solution!(
     Day09_2024,
     [
-        (
-            PartNumber::Part1,
-            SolutionInput::FullInput,
-            Some(6382875730645)
-        ),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("2333133121414131402"),
-            Some(1928)
-        ),
-        (
-            PartNumber::Part2,
-            SolutionInput::FullInput,
-            Some(6420913943576)
-        ),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("2333133121414131402"),
-            Some(2858)
-        ),
+        solution_part1(Some(6382875730645_i64)),
+        example_part1(1928, "2333133121414131402"),
+        solution_part2(Some(6420913943576_i64)),
+        example_part2(2858, "2333133121414131402"),
     ]
 );
 

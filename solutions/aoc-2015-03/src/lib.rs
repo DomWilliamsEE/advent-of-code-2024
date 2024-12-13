@@ -1,36 +1,29 @@
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use glam::IVec2;
 use std::collections::HashSet;
 
 pub struct Day03_2015;
 
 impl Solution for Day03_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => visit_houses(input.trim()),
             PartNumber::Part2 => visit_houses_with_robo(input.trim()),
         }
     }
 }
+
 solution!(
     Day03_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(2572)),
-        (PartNumber::Part1, SolutionInput::Example(">"), Some(2)),
-        (PartNumber::Part1, SolutionInput::Example("^>v<"), Some(4)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("^v^v^v^v^v"),
-            Some(2)
-        ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(2631)),
-        (PartNumber::Part2, SolutionInput::Example("^v"), Some(3)),
-        (PartNumber::Part2, SolutionInput::Example("^>v<"), Some(3)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("^v^v^v^v^v"),
-            Some(11)
-        ),
+        solution_part1(Some(2572)),
+        example_part1(2, ">"),
+        example_part1(4, "^>v<"),
+        example_part1(2, "^v^v^v^v^v"),
+        solution_part2(Some(2631)),
+        example_part2(3, "^v"),
+        example_part2(3, "^>v<"),
+        example_part2(11, "^v^v^v^v^v"),
     ]
 );
 

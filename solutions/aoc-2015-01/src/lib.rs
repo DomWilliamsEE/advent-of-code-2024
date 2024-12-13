@@ -1,26 +1,23 @@
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 
 pub struct Day01_2015;
 
 impl Solution for Day01_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => find_destination_floor(input.trim()),
             PartNumber::Part2 => find_basement_pos(input.trim()),
         }
     }
 }
+
 solution!(
     Day01_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(74)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("(()(()("),
-            Some(3)
-        ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(1795)),
-        (PartNumber::Part2, SolutionInput::Example("()())"), Some(5)),
+        solution_part1(Some(74)),
+        example_part1(3, "(()(()("),
+        solution_part2(Some(1795)),
+        example_part2(5, "()())"),
     ]
 );
 

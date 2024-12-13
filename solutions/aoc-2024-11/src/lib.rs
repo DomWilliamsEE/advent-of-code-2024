@@ -1,33 +1,29 @@
 #![allow(dead_code)]
 
 use crate::compress_ints_zstd::CompressedIntsZstd;
-use common::itertools::Itertools;
-use common::{example_part1, solution, PartNumber, Solution, SolutionInput};
+
+use common::prelude::*;
 use hashbrown::hash_map::Entry;
 use hashbrown::HashMap;
 use size_of::SizeOf;
-use std::fmt::Debug;
 
 pub struct Day11_2024;
 
 impl Solution for Day11_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => count_recursively(input, 25),
             PartNumber::Part2 => count_recursively(input, 75),
         }
     }
 }
+
 solution!(
     Day11_2024,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(188902)),
+        solution_part1(Some(188902)),
         example_part1(55312, "125 17"),
-        (
-            PartNumber::Part2,
-            SolutionInput::FullInput,
-            Some(223894720281135)
-        ),
+        solution_part2(Some(223894720281135_i64)),
     ]
 );
 
@@ -162,10 +158,9 @@ mod tests {
 }
 
 mod compressed_ints_small_separately {
+    use super::*;
     use bitvec::prelude::BitVec;
-
-    use size_of::{Context, SizeOf};
-
+    use size_of::Context;
     use std::ops::{Deref, DerefMut};
 
     #[derive(Default, SizeOf)]
@@ -260,7 +255,7 @@ mod compressed_ints_small_separately {
     }
 
     #[cfg(test)]
-    impl Debug for CompressedInts {
+    impl std::fmt::Debug for CompressedInts {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             f.debug_list().entries(self.iter()).finish()
         }

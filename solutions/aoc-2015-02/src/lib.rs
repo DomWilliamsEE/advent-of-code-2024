@@ -1,28 +1,24 @@
-use common::itertools::Itertools;
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 
 pub struct Day02_2015;
 
 impl Solution for Day02_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
-            PartNumber::Part1 => input.lines().map(paper_requirement).sum(),
-            PartNumber::Part2 => input.lines().map(ribbon_requirement).sum(),
+            PartNumber::Part1 => input.lines().map(paper_requirement).sum::<i64>(),
+            PartNumber::Part2 => input.lines().map(ribbon_requirement).sum::<i64>(),
         }
     }
 }
+
 solution!(
     Day02_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(1586300)),
-        (PartNumber::Part1, SolutionInput::Example("2x3x4"), Some(58)),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(3737498)),
-        (PartNumber::Part2, SolutionInput::Example("2x3x4"), Some(34)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("1x1x10"),
-            Some(14)
-        ),
+        solution_part1(Some(1586300)),
+        example_part1(58, "2x3x4"),
+        solution_part2(Some(3737498)),
+        example_part2(34, "2x3x4"),
+        example_part2(14, "1x1x10"),
     ]
 );
 

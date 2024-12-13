@@ -1,39 +1,24 @@
-use common::itertools::{repeat_n, Itertools};
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::itertools::repeat_n;
+use common::prelude::*;
 
 pub struct Day07_2024;
 
 impl Solution for Day07_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => part_one(input),
             PartNumber::Part2 => part_two(input),
         }
     }
 }
+
 solution!(
     Day07_2024,
     [
-        (
-            PartNumber::Part1,
-            SolutionInput::FullInput,
-            Some(2941973819040)
-        ),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example(PART1_EXAMPLE),
-            Some(3749)
-        ),
-        (
-            PartNumber::Part2,
-            SolutionInput::FullInput,
-            Some(249943041417600)
-        ),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example(PART1_EXAMPLE),
-            Some(11387)
-        ),
+        solution_part1(Some(2941973819040_i64)),
+        example_part1(3749, PART1_EXAMPLE),
+        solution_part2(Some(249943041417600_i64)),
+        example_part2(11387, PART1_EXAMPLE),
     ]
 );
 

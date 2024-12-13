@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use common::{ExemplarEntrypointFn, PartNumber, SolutionEntrypointFn};
+use common::{CaseEntrypointFn, PartNumber};
 use env_logger::Env;
 use libloading::{Library, Symbol};
 use log::{error, info, warn};
@@ -14,7 +14,7 @@ pub struct Args {
     /// All parts if not set
     pub part: Option<PartNumber>,
     pub only_solutions: bool,
-    pub exemplar: Option<u32>,
+    pub case: Option<u32>,
 }
 
 fn do_main() -> Result<()> {
@@ -104,36 +104,25 @@ fn run_solution(args: Args, input: &str) -> Result<()> {
         let lib = Library::new(lib_path).context("Failed to load solution library")?;
 
         std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<()> {
-            if args.only_solutions {
-                let func: Symbol<SolutionEntrypointFn> = lib
-                    .get(b"solution_entrypoint")
-                    .context("Failed to load get_solution symbol")?;
+            let func: Symbol<CaseEntrypointFn> = lib
+                .get(b"run_cases_entrypoint")
+                .context("Failed to load run_cases_entrypoint symbol")?;
 
-                let parts = args
-                    .part
-                    .map(|p| [p].to_vec())
-                    .unwrap_or(vec![PartNumber::Part1, PartNumber::Part2]);
+            let part_filter = args.part.map(|p| p as u8).unwrap_or(0);
+            let case_filter = args.case.unwrap_or(0);
 
-                for part in parts {
-                    info!("calling solution entrypoint with part {part:?}");
-                    let res = func(input.as_ptr(), input.len(), part as u8);
-                    info!("solution to part {part:?}: {res}");
-                }
+            info!("calling run_cases entrypoint");
+            let res = func(
+                input.as_ptr(),
+                input.len(),
+                part_filter,
+                case_filter,
+                args.only_solutions,
+            );
+            if res {
+                info!("all cases passed");
             } else {
-                let func: Symbol<ExemplarEntrypointFn> = lib
-                    .get(b"run_exemplars_entrypoint")
-                    .context("Failed to load run_exemplars_entrypoint symbol")?;
-
-                let part_filter = args.part.map(|p| p as u8).unwrap_or(0);
-                let exemplar_filter = args.exemplar.unwrap_or(0);
-
-                info!("calling run_exemplars entrypoint");
-                let res = func(input.as_ptr(), input.len(), part_filter, exemplar_filter);
-                if res {
-                    info!("all exemplars passed");
-                } else {
-                    warn!("some exemplars failed");
-                }
+                warn!("some cases failed");
             }
 
             Ok(())
@@ -160,7 +149,7 @@ impl Args {
         let mut year = None;
         let mut part = None;
         let mut only_solutions = false;
-        let mut exemplar = None;
+        let mut case = None;
 
         while let Some(arg) = args.next() {
             match arg.as_str() {
@@ -186,12 +175,12 @@ impl Args {
                 "--2" => {
                     part = Some(PartNumber::Part2);
                 }
-                "--exemplar" => {
-                    exemplar = Some(
+                "--case" => {
+                    case = Some(
                         args.next()
-                            .context("--exemplar requires a number")?
+                            .context("--case requires a number")?
                             .parse()
-                            .context("exemplar must be a valid number")?,
+                            .context("case must be a valid number")?,
                     );
                 }
                 "--only-solutions" => only_solutions = true,
@@ -204,7 +193,7 @@ impl Args {
             year: year.context("--year is required")?,
             part,
             only_solutions,
-            exemplar,
+            case,
         })
     }
 }

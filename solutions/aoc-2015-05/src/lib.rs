@@ -1,48 +1,28 @@
-use common::itertools::Itertools;
-use common::{lines, solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 
 pub struct Day05_2015;
 
 impl Solution for Day05_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => lines(input).filter(|line| is_nice(line)).count() as i64,
             PartNumber::Part2 => lines(input).filter(|line| is_nice_v2(line)).count() as i64,
         }
     }
 }
+
 solution!(
     Day05_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(236)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("ugknbfddgicrmopn"),
-            Some(1)
-        ),
-        (PartNumber::Part1, SolutionInput::Example("aaa"), Some(1)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("jchzalrnumimnmhp"),
-            Some(0)
-        ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(51)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("qjhvhtzxzqqjkmpb"),
-            Some(1)
-        ),
-        (PartNumber::Part2, SolutionInput::Example("xxyxx"), Some(1)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("uurcxstgmygtbstg"),
-            Some(0)
-        ),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example("ieodomkazucvgmuy"),
-            Some(0)
-        ),
+        solution_part1(Some(236)),
+        example_part1(1, "ugknbfddgicrmopn"),
+        example_part1(1, "aaa"),
+        example_part1(0, "jchzalrnumimnmhp"),
+        solution_part2(Some(51)),
+        example_part2(1, "qjhvhtzxzqqjkmpb"),
+        example_part2(1, "xxyxx"),
+        example_part2(0, "uurcxstgmygtbstg"),
+        example_part2(0, "ieodomkazucvgmuy"),
     ]
 );
 

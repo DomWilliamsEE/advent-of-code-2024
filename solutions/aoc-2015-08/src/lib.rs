@@ -1,9 +1,9 @@
-use common::{example_part1, example_part2, lines, solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 
 pub struct Day08_2015;
 
 impl Solution for Day08_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => lines(input)
                 .map(|s| len(s) - len(&parse_string_literal(s)))
@@ -18,7 +18,7 @@ impl Solution for Day08_2015 {
 solution!(
     Day08_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(1333)),
+        solution_part1(Some(1333)),
         example_part1(
             12,
             r#"""
@@ -26,7 +26,7 @@ solution!(
         "aaa\"aaa"
         "\x27""#
         ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(2046)),
+        solution_part2(Some(2046)),
         example_part2(
             19,
             r#"""

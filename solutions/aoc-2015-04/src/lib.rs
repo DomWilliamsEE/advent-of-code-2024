@@ -1,30 +1,23 @@
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 
 pub struct Day04_2015;
 
 impl Solution for Day04_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => find_lowest_number(input, 5),
             PartNumber::Part2 => find_lowest_number(input, 6),
         }
     }
 }
+
 solution!(
     Day04_2015,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(254575)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("abcdef"),
-            Some(609043)
-        ),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example("pqrstuv"),
-            Some(1048970)
-        ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(1038736)),
+        solution_part1(Some(254575)),
+        example_part1(609043, "abcdef"),
+        example_part1(1048970, "pqrstuv"),
+        solution_part2(Some(1038736)),
     ]
 );
 

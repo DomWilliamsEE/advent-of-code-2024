@@ -1,5 +1,4 @@
-use common::itertools::Itertools;
-use common::{example_part1, example_part2, lines, solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use geo::{Area, BooleanOps, Euclidean, Length, MultiPolygon, Polygon, Rect};
 use glam::{ivec2, uvec2, IVec2, UVec2};
 use std::collections::HashSet;
@@ -7,17 +6,18 @@ use std::collections::HashSet;
 pub struct Day12_2024;
 
 impl Solution for Day12_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => Grid::new(input).calculate_fence_price::<ModernPricing>(),
             PartNumber::Part2 => Grid::new(input).calculate_fence_price::<BulkPricing>(),
         }
     }
 }
+
 solution!(
     Day12_2024,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(1485656)),
+        solution_part1(Some(1485656)),
         example_part1(
             140,
             "AAAA
@@ -46,7 +46,7 @@ MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE"
         ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(899196)),
+        solution_part2(Some(899196)),
         example_part2(
             80,
             "AAAA

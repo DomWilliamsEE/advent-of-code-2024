@@ -1,22 +1,20 @@
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use std::iter::Iterator;
 
 pub struct Day10_2015;
 
 impl Solution for Day10_2015 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => apply(input, 40),
             PartNumber::Part2 => apply(input, 50),
         }
     }
 }
+
 solution!(
     Day10_2015,
-    [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(360154)),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(5103798)),
-    ]
+    [solution_part1(Some(360154)), solution_part2(Some(5103798))]
 );
 
 #[test]

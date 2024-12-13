@@ -1,5 +1,4 @@
-use common::itertools::Itertools;
-use common::{solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use glam::{uvec2, IVec2, UVec2};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -7,7 +6,7 @@ use std::str::FromStr;
 pub struct Day08_2024;
 
 impl Solution for Day08_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => part_one(input),
             PartNumber::Part2 => part_two(input),
@@ -31,18 +30,10 @@ const PART1_EXAMPLE: &str = "............
 solution!(
     Day08_2024,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(265)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example(PART1_EXAMPLE),
-            Some(14),
-        ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(962)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example(PART1_EXAMPLE),
-            Some(34),
-        ),
+        solution_part1(Some(265)),
+        example_part1(14, PART1_EXAMPLE),
+        solution_part2(Some(962)),
+        example_part2(34, PART1_EXAMPLE),
     ]
 );
 

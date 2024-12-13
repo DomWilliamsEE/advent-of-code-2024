@@ -1,5 +1,6 @@
 pub use itertools;
 use owo_colors::OwoColorize;
+use std::fmt::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
@@ -8,8 +9,14 @@ pub enum PartNumber {
     Part2 = 2,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SolutionResult {
+    Int(i64),
+    String(String),
+}
+
 pub trait Solution {
-    fn solve(input: &str, part: PartNumber) -> i64;
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult>;
 }
 
 pub enum SolutionInput {
@@ -17,46 +24,24 @@ pub enum SolutionInput {
     Example(&'static str),
 }
 
-pub type SolutionEntrypointFn =
-    unsafe extern "C" fn(input_ptr: *const u8, input_len_bytes: usize, part: u8) -> i64;
-
-pub type ExemplarEntrypointFn = unsafe extern "C" fn(
+pub type CaseEntrypointFn = unsafe extern "C" fn(
     input_ptr: *const u8,
     input_len_bytes: usize,
     part_filter: u8,
-    exemplar_filter: u32,
+    case_filter: u32,
+    solutions_only: bool,
 ) -> bool;
 
 #[macro_export]
 macro_rules! solution {
-    ($solution:ty, $exemplars:expr) => {
+    ($solution:ty, $cases:expr) => {
         #[no_mangle]
-        pub extern "C" fn solution_entrypoint(
-            input_ptr: *const u8,
-            input_len_bytes: usize,
-            part: u8,
-        ) -> i64 {
-            let part = match part {
-                1 => common::PartNumber::Part1,
-                2 => common::PartNumber::Part2,
-                _ => panic!("invalid part number {part}"),
-            };
-            let input = unsafe {
-                std::str::from_utf8_unchecked(std::slice::from_raw_parts(
-                    input_ptr,
-                    input_len_bytes,
-                ))
-            };
-
-            <$solution>::solve(input, part)
-        }
-
-        #[no_mangle]
-        pub extern "C" fn run_exemplars_entrypoint(
+        pub extern "C" fn run_cases_entrypoint(
             input_ptr: *const u8,
             input_len_bytes: usize,
             part_filter: u8,
-            exemplar_filter: u32,
+            case_filter: u32,
+            solutions_only: bool,
         ) -> bool {
             let input = unsafe {
                 std::str::from_utf8_unchecked(std::slice::from_raw_parts(
@@ -72,43 +57,48 @@ macro_rules! solution {
                 _ => panic!("invalid part number {part_filter}"),
             };
 
-            $crate::run_exemplars::<$solution>(input, &$exemplars, part, exemplar_filter)
+            $crate::run_cases::<$solution>(input, &$cases, part, case_filter, solutions_only)
         }
     };
 }
 
-pub fn run_exemplars<S: Solution>(
+pub fn run_cases<S: Solution>(
     input: &str,
-    exemplars: &[(PartNumber, SolutionInput, Option<i64>)],
+    cases: &[(PartNumber, SolutionInput, Option<SolutionResult>)],
     part_filter: Option<PartNumber>,
-    exemplar_filter: u32,
+    case_filter: u32,
+    solutions_only: bool,
 ) -> bool {
     let mut failed = 0;
     let mut total = 0;
     let mut all_passed = true;
 
-    for (i, (part, exemplar_input, expected)) in exemplars.iter().enumerate() {
+    for (i, (part, case_input, expected)) in cases.iter().enumerate() {
         if part_filter.is_some() && Some(*part) != part_filter {
             continue;
         }
 
-        if exemplar_filter != 0 && (i + 1) as u32 != exemplar_filter {
+        if case_filter != 0 && (i + 1) as u32 != case_filter {
+            continue;
+        }
+
+        if solutions_only && !matches!(case_input, SolutionInput::FullInput) {
             continue;
         }
 
         total += 1;
 
-        let (input, wat) = match exemplar_input {
+        let (input, wat) = match case_input {
             SolutionInput::FullInput => (input, "input  "),
             SolutionInput::Example(example) => (*example, "example"),
         };
-        let result = S::solve(input, *part);
+        let result = S::solve(input, *part).into();
 
-        match *expected {
+        match expected.clone() {
             Some(expected) if expected == result => {
                 println!("\n{}", "═".repeat(80).bright_blue());
                 println!(
-                    "   {} {} exemplar #{} for part {part:?} {wat}: {}",
+                    "   {} {} case #{} for part {part:?} {wat}: {}",
                     "✓",
                     "PASS".green().bold(),
                     i + 1,
@@ -120,7 +110,7 @@ pub fn run_exemplars<S: Solution>(
                 failed += 1;
                 println!("\n{}", "═".repeat(80).bright_red());
                 println!(
-                    "   {} {} exemplar #{} for part {part:?} {wat}: expected {}, got {}",
+                    "   {} {} case #{} for part {part:?} {wat}: expected {}, got {}",
                     "✗",
                     "FAIL".red().bold(),
                     i + 1,
@@ -132,7 +122,7 @@ pub fn run_exemplars<S: Solution>(
             }
             None => {
                 println!(
-                    "{} {} exemplar #{} for part {part:?} {wat}: {}",
+                    "{} {} case #{} for part {part:?} {wat}: {}",
                     "?",
                     "INFO".bright_yellow(),
                     i + 1,
@@ -161,18 +151,75 @@ pub fn lines(input: &str) -> impl Iterator<Item = &str> {
         .map(|line| line.trim())
 }
 
-pub fn example_part1(answer: i64, input: &'static str) -> (PartNumber, SolutionInput, Option<i64>) {
+pub fn solution_part1(
+    answer: Option<impl Into<SolutionResult>>,
+) -> (PartNumber, SolutionInput, Option<SolutionResult>) {
     (
         PartNumber::Part1,
-        SolutionInput::Example(input),
-        Some(answer),
+        SolutionInput::FullInput,
+        answer.map(|a| a.into()),
     )
 }
 
-pub fn example_part2(answer: i64, input: &'static str) -> (PartNumber, SolutionInput, Option<i64>) {
+pub fn solution_part2(
+    answer: Option<impl Into<SolutionResult>>,
+) -> (PartNumber, SolutionInput, Option<SolutionResult>) {
+    (
+        PartNumber::Part2,
+        SolutionInput::FullInput,
+        answer.map(|a| a.into()),
+    )
+}
+
+pub fn example_part1(
+    answer: impl Into<SolutionResult>,
+    input: &'static str,
+) -> (PartNumber, SolutionInput, Option<SolutionResult>) {
+    (
+        PartNumber::Part1,
+        SolutionInput::Example(input),
+        Some(answer.into()),
+    )
+}
+
+pub fn example_part2(
+    answer: impl Into<SolutionResult>,
+    input: &'static str,
+) -> (PartNumber, SolutionInput, Option<SolutionResult>) {
     (
         PartNumber::Part2,
         SolutionInput::Example(input),
-        Some(answer),
+        Some(answer.into()),
     )
+}
+
+impl From<i64> for SolutionResult {
+    fn from(value: i64) -> Self {
+        Self::Int(value)
+    }
+}
+
+impl From<String> for SolutionResult {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl Display for SolutionResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Int(i) => i.fmt(f),
+            Self::String(s) => s.fmt(f),
+        }
+    }
+}
+
+pub mod prelude {
+
+    pub use crate::{
+        example_part1, example_part2, lines, solution, solution_part1, solution_part2, PartNumber,
+        Solution, SolutionInput, SolutionResult,
+    };
+
+    pub use itertools::{self, Itertools};
 }

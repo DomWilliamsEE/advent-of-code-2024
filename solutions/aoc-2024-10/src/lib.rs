@@ -1,12 +1,11 @@
-use common::itertools::Itertools;
-use common::{lines, solution, PartNumber, Solution, SolutionInput};
+use common::prelude::*;
 use glam::{ivec2, IVec2, UVec2};
 use std::collections::HashMap;
 
 pub struct Day10_2024;
 
 impl Solution for Day10_2024 {
-    fn solve(input: &str, part: PartNumber) -> i64 {
+    fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => {
                 let map = Map::new(input);
@@ -19,32 +18,25 @@ impl Solution for Day10_2024 {
         }
     }
 }
+
 solution!(
     Day10_2024,
     [
-        (PartNumber::Part1, SolutionInput::FullInput, Some(587)),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example(PART1_EXAMPLE),
-            Some(1)
-        ),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example(
-                "..90..9
+        solution_part1(Some(587)),
+        example_part1(1, PART1_EXAMPLE),
+        example_part1(
+            4,
+            "..90..9
         ...1.98
         ...2..7
         6543456
         765.987
         876....
         987...."
-            ),
-            Some(4)
         ),
-        (
-            PartNumber::Part1,
-            SolutionInput::Example(
-                "89010123
+        example_part1(
+            36,
+            "89010123
         78121874
         87430965
         96549874
@@ -52,14 +44,11 @@ solution!(
         32019012
         01329801
         10456732"
-            ),
-            Some(36)
         ),
-        (PartNumber::Part2, SolutionInput::FullInput, Some(1340)),
-        (
-            PartNumber::Part2,
-            SolutionInput::Example(
-                "89010123
+        solution_part2(Some(1340)),
+        example_part2(
+            81,
+            "89010123
         78121874
         87430965
         96549874
@@ -67,8 +56,6 @@ solution!(
         32019012
         01329801
         10456732"
-            ),
-            Some(81)
         ),
     ]
 );
