@@ -1,5 +1,6 @@
 pub use itertools;
 use owo_colors::OwoColorize;
+use std::borrow::Cow;
 use std::fmt::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -9,7 +10,7 @@ pub enum PartNumber {
     Part2 = 2,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum SolutionResult {
     Int(i64),
     String(String),
@@ -205,6 +206,30 @@ impl From<String> for SolutionResult {
     }
 }
 
+impl From<&str> for SolutionResult {
+    fn from(value: &str) -> Self {
+        Self::String(value.to_owned())
+    }
+}
+
+impl PartialEq<Self> for SolutionResult {
+    fn eq(&self, other: &Self) -> bool {
+        let a = match self {
+            Self::Int(i) => Cow::Owned(i.to_string()),
+            Self::String(s) => Cow::Borrowed(s),
+        };
+
+        let b = match other {
+            Self::Int(i) => Cow::Owned(i.to_string()),
+            Self::String(s) => Cow::Borrowed(s),
+        };
+
+        a == b
+    }
+}
+
+impl Eq for SolutionResult {}
+
 impl Display for SolutionResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -215,7 +240,6 @@ impl Display for SolutionResult {
 }
 
 pub mod prelude {
-
     pub use crate::{
         example_part1, example_part2, lines, solution, solution_part1, solution_part2, PartNumber,
         Solution, SolutionInput, SolutionResult,
