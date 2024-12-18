@@ -58,6 +58,7 @@ fn test_build_2024_18() {}
 
 struct MemorySpace {
     byte_positions: Vec<UVec2>,
+    /// inclusive
     sz: u32,
     steps: usize,
 }
@@ -104,13 +105,13 @@ impl MemorySpace {
             },
             |pos| *pos == end,
         )
-        .map(|path| path.len() as i64)
+        .map(|path| path.len() as i64 - 1)
     }
 
     fn find_first_blocking_byte(&mut self) -> Option<UVec2> {
-        for (i, byte) in self.byte_positions.iter().copied().enumerate() {
-            self.steps = i + 1;
-            if self.find_path_len().is_none() {
+        for (i, byte) in self.byte_positions.iter().copied().enumerate().rev() {
+            self.steps = i;
+            if self.find_path_len().is_some() {
                 return Some(byte);
             }
         }
