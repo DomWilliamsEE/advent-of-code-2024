@@ -1,0 +1,13 @@
+[package]
+name = "aoc-2024-20"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+common = { path = "../../common" }
+pathfinding = "4.12"
+glam = "0.29"
+hashbrown = "0.15.2"
