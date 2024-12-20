@@ -1,10 +1,7 @@
-use common::itertools::Either;
 use common::prelude::*;
 use glam::{ivec2, IVec2};
-use pathfinding::prelude::{bfs, dijkstra};
+use pathfinding::prelude::bfs;
 use std::iter::empty;
-use std::time::Instant;
-use hashbrown::HashMap;
 
 pub struct Day20_2024;
 
@@ -12,19 +9,20 @@ impl Solution for Day20_2024 {
     fn solve(input: &str, part: PartNumber) -> impl Into<SolutionResult> {
         match part {
             PartNumber::Part1 => {
-                let mut grid = parse_input(input);
-                grid.count_cheats()
-                    .filter_map(|(seconds_saved, count)| (seconds_saved >= 100).then_some(count))
-                    .sum::<usize>() as i64
+                let grid = parse_input(input);
+                grid.count_cheats_saving_at_least(2, 100)
             }
-            PartNumber::Part2 => -1_i64,
+            PartNumber::Part2 => {
+                let grid = parse_input(input);
+                grid.count_cheats_saving_at_least(20, 100)
+            }
         }
     }
 }
 
 solution!(
     Day20_2024,
-    [solution_part1(None::<i64>), solution_part2(None::<i64>),]
+    [solution_part1(Some(1296)), solution_part2(Some(977665)),]
 );
 
 const PART1_EXAMPLE: &str = "###############
@@ -50,12 +48,17 @@ fn test_build_2024_20() {}
 
 struct Grid {
     dims: IVec2,
-    // true if not blocked
-    cells: Vec<bool>,
+    cells: Vec<Cell>,
 
     endpoints: [IVec2; 2],
 
     normal_path_time: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Cell {
+    Wall,
+    Space { dist_from_end: u32 },
 }
 
 fn parse_input(input: &str) -> Grid {
@@ -73,7 +76,11 @@ fn parse_input(input: &str) -> Grid {
             }
             _ => {}
         })
-        .map(|(_, c)| c != '#')
+        .map(|(_, c)| match c {
+            '#' => Cell::Wall,
+            '.' | 'S' | 'E' => Cell::Space { dist_from_end: 0 },
+            _ => unreachable!(),
+        })
         .collect_vec();
 
     let mut grid = Grid {
@@ -86,32 +93,34 @@ fn parse_input(input: &str) -> Grid {
     grid
 }
 
-#[derive(Debug, Clone)]
-struct Cheat {
-    start: IVec2,
-    end: IVec2,
-}
-
 impl Grid {
-    // fn iter_cheats(&self) -> impl Iterator<Item = IVec2> + '_ {
-
-    fn normal_path_time(&self) -> usize {
-        bfs(
+    fn normal_path_time(&mut self) -> usize {
+        let path = bfs(
             &self.endpoints[0],
             |pos| self.get_normal_successors(*pos),
             |pos| *pos == self.endpoints[1],
         )
-        .unwrap()
-        .len()
-            - 1
+        .unwrap();
+        for (i, pos) in path.iter().enumerate() {
+            let cell = &mut self.cells[pos.y as usize * self.dims.x as usize + pos.x as usize];
+            assert!(matches!(cell, Cell::Space { .. }));
+            *cell = Cell::Space {
+                dist_from_end: (path.len() - i) as u32,
+            };
+        }
+
+        path.len() - 1
+    }
+
+    fn cell(&self, pos: IVec2) -> Option<Cell> {
+        (pos.x >= 0 && pos.x < self.dims.x && pos.y >= 0 && pos.y < self.dims.y)
+            .then(|| self.cells[pos.x as usize + pos.y as usize * self.dims.x as usize])
     }
 
     fn cell_is_open(&self, pos: IVec2) -> bool {
-        pos.x >= 0
-            && pos.x < self.dims.x
-            && pos.y >= 0
-            && pos.y < self.dims.y
-            && self.cells[pos.x as usize + pos.y as usize * self.dims.x as usize]
+        self.cell(pos)
+            .map(|c| matches!(c, Cell::Space { .. }))
+            .unwrap_or(false)
     }
 
     fn get_normal_successors(&self, pos: IVec2) -> impl Iterator<Item = IVec2> + '_ {
@@ -126,114 +135,35 @@ impl Grid {
             })
     }
 
-    fn get_cheat_successors(&self, pos: IVec2) -> impl Iterator<Item = (IVec2, IVec2)> + '_ {
-        [ivec2(-1, 0), ivec2(1, 0), ivec2(0, -1), ivec2(0, 1)]
-            .into_iter()
-            .filter_map(move |dir| {
-                let wall_pos = pos + dir;
-                let back_on_track_pos = wall_pos + dir;
+    fn count_cheats_saving_at_least(&self, cheat_dist: i32, min_saving: i32) -> i64 {
+        let mut count = 0;
 
-                if !self.cell_is_open(wall_pos) && self.cell_is_open(back_on_track_pos) {
-                    return Some((back_on_track_pos, wall_pos));
-                }
+        for (i, cell) in self.cells.iter().enumerate() {
+            let start_pos = match cell {
+                Cell::Space { dist_from_end } => *dist_from_end,
+                _ => continue,
+            };
+            let pos = ivec2(i as i32 % self.dims.x, i as i32 / self.dims.x);
 
-                None
-            })
-    }
+            for dx in -cheat_dist..=cheat_dist {
+                let left = cheat_dist - dx.abs();
+                for dy in -left..=left {
+                    let new_pos = pos + ivec2(dx, dy);
+                    let manhatten_dist = dx.abs() + dy.abs();
 
-    fn count_cheats(&self) -> impl Iterator<Item = (usize, usize)> {
-        #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
-        struct Node {
-            pos: IVec2,
-            time_so_far: usize,
-            cheated: Option<[IVec2; 2]>,
-        }
-
-        let mut cheats_so_far = HashMap::new();
-
-        loop {
-            let start = Instant::now();
-            let Some((path, cost)) = dijkstra(
-                &Node {
-                    pos: self.endpoints[0],
-                    time_so_far: 0,
-                    cheated: None,
-                },
-                |n| {
-                    if n.time_so_far >=  self.normal_path_time {
-                        return vec![];
-                    }
-
-                    let succ = self.get_normal_successors(n.pos).map(|succ| {
-                        (
-                            Node {
-                                pos: succ,
-                                time_so_far: n.time_so_far + 1,
-                                cheated: n.cheated,
-                            },
-                            1,
-                        )
-                    });
-
-                    let extra_cheats = if n.cheated.is_none() {
-                        Either::Left(self.get_cheat_successors(n.pos).filter_map(
-                            |(succ, wall_pos)| {
-                                let cheat = [n.pos, succ];
-                                (!cheats_so_far.contains_key(&cheat)).then(|| {
-                                    (
-                                        Node {
-                                            pos: succ,
-                                            time_so_far: n.time_so_far + 2,
-                                            cheated: Some(cheat),
-                                        },
-                                        1,
-                                    )
-                                })
-                            },
-                        ))
-                    } else {
-                        Either::Right(empty())
+                    let shortcut_dist = match self.cell(new_pos) {
+                        Some(Cell::Space { dist_from_end }) => dist_from_end,
+                        _ => continue,
                     };
 
-                    extra_cheats.into_iter().chain(succ).collect_vec()
-                },
-                // |n| (n.pos.x - self.endpoints[1].x).abs() + (n.pos.y - self.endpoints[1].y).abs(),
-                |n| n.pos == self.endpoints[1],
-            ) else {
-                println!("no path");
-                break;
-            };
-
-            let elapsed = start.elapsed();
-
-            let Some(cheat) = path.iter().find_map(|n| n.cheated) else {
-                println!("no cheat");
-                break;
-            };
-
-            let time = path.last().unwrap().time_so_far;
-            let total_time = time;
-            let saved_time = self.normal_path_time - total_time;
-            println!("cheated with {cheat:?} to get total time {total_time}, saving {saved_time} ({:.2}s)", elapsed.as_secs_f32(),);
-
-            // cheats_so_far.insert(cheat, saved_time);
-            //     self.print(path.iter().map(|n| {
-            //         (
-            //             n.pos,
-            //             n.cheated
-            //                 .map(|c| c[1] == n.pos || c[0] == n.pos)
-            //                 .unwrap_or(false),
-            //         )
-            //     }));
-
-            cheats_so_far.insert(cheat, saved_time);
+                    if start_pos as i32 - shortcut_dist as i32 - manhatten_dist >= min_saving {
+                        count += 1;
+                    }
+                }
+            }
         }
 
-        cheats_so_far
-            .into_iter()
-            .counts_by(|x| x.1)
-            .into_iter()
-            .sorted_by_key(|x| x.0)
+        count
     }
 
     fn print(&self, path: impl Iterator<Item = (IVec2, bool)>) {
@@ -242,21 +172,25 @@ impl Grid {
             .iter()
             .enumerate()
             .map(|(i, c)| {
-                let pos = ivec2(i as i32 % self.dims.x as i32, i as i32 / self.dims.x as i32);
+                let pos = ivec2(i as i32 % self.dims.x, i as i32 / self.dims.x);
                 if pos == self.endpoints[0] {
                     'S'
                 } else if pos == self.endpoints[1] {
                     'E'
-                } else if *c {
-                    '.'
                 } else {
-                    '#'
+                    match c {
+                        Cell::Wall => '#',
+                        Cell::Space { .. } => {
+                            // (b'0' + (*dist_from_end as u8) % 10) as char
+                            '.'
+                        }
+                    }
                 }
             })
             .collect_vec();
 
         for (pos, cheat) in path {
-            let mut c = &mut grid[(pos.y * self.dims.x + pos.x) as usize];
+            let c = &mut grid[(pos.y * self.dims.x + pos.x) as usize];
             let new_c = if cheat { 'C' } else { 'o' };
 
             if new_c != 'o' || !c.is_ascii_uppercase() {
@@ -277,33 +211,16 @@ impl Grid {
 }
 
 #[test]
-fn test_part1_input() {
+fn test_example() {
     let grid = parse_input(PART1_EXAMPLE);
     println!("endpoints {:?}", grid.endpoints);
     assert_eq!(grid.normal_path_time, 84);
-    // for i in 50..70 {
-    //     println!("{i:02}: {}", grid.cheat(i));
-    // }
 
-    println!("grid");
     grid.print(empty());
+    assert_eq!(grid.count_cheats_saving_at_least(2, 64), 1);
+    assert_eq!(grid.count_cheats_saving_at_least(2, 20), 5);
+    assert_eq!(grid.count_cheats_saving_at_least(2, 10), 10);
 
-    let cheats = grid.count_cheats().collect_vec();
-    println!("{:?}", cheats);
-    assert_eq!(
-        cheats,
-        vec![
-            (2, 14),
-            (4, 14),
-            (6, 2),
-            (8, 4),
-            (10, 2),
-            (12, 3),
-            (20, 1),
-            (36, 1),
-            (38, 1),
-            (40, 1),
-            (64, 1),
-        ]
-    )
+    assert_eq!(grid.count_cheats_saving_at_least(20, 76), 3);
+    assert_eq!(grid.count_cheats_saving_at_least(20, 74), 7);
 }
