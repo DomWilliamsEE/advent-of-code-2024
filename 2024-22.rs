@@ -1,0 +1,1 @@
+solutions/aoc-2024-22/src/lib.rs
