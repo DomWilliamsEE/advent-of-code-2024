@@ -297,6 +297,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc-2024-21"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "glam",
+ "pathfinding",
+]
+
+[[package]]
 name = "aoc-2024-22"
 version = "0.1.0"
 dependencies = [
