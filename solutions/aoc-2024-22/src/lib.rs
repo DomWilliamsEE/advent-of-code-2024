@@ -86,36 +86,45 @@ fn part2(input: &str) -> i64 {
 
     let sz = seq_occurrences.len();
     let done = AtomicUsize::new(0);
-    let res = seq_occurrences.into_par_iter().fold(|| HashMap::new(), |mut acc, seq| {
+    let res = seq_occurrences
+        .into_par_iter()
+        .fold(
+            || HashMap::new(),
+            |mut acc, seq| {
+                all_price_changes.iter().for_each(|buyer| {
+                    let total_bananas = buyer.windows(4).find_map(|window| {
+                        if window[0].1 == seq[0]
+                            && window[1].1 == seq[1]
+                            && window[2].1 == seq[2]
+                            && window[3].1 == seq[3]
+                        {
+                            Some(window[3].0)
+                        } else {
+                            None
+                        }
+                    });
 
-        all_price_changes.iter().for_each(|buyer| {
+                    if let Some(total_bananas) = total_bananas {
+                        *acc.entry(seq).or_default() += total_bananas;
+                    }
+                });
 
-            let total_bananas = buyer.windows(4).find_map(|window| {
-                if window[0].1 == seq[0]
-                    && window[1].1 == seq[1]
-                    && window[2].1 == seq[2]
-                    && window[3].1 == seq[3]
-                {
-                    Some(window[3].0)
-                } else {
-                    None
-                }
-            });
+                let n = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                println!(
+                    "done with another {n}/{sz} sequences, {:.2}%",
+                    (n as f64 / sz as f64) * 100.0
+                );
 
-            if let Some(total_bananas) = total_bananas {
-                *acc.entry(seq).or_default() += total_bananas;
-            }
-
-        });
-
-        let n = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        println!("done with another {n}/{sz} sequences, {:.2}%", (n as f64 / sz as f64) * 100.0);
-
-        acc
-    }).reduce(|| HashMap::new(), |mut a, b| {
-        a.extend(b);
-        a
-    });
+                acc
+            },
+        )
+        .reduce(
+            || HashMap::new(),
+            |mut a, b| {
+                a.extend(b);
+                a
+            },
+        );
     res.values().max().copied().unwrap()
 }
 
