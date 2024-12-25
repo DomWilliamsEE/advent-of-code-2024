@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use common::itertools::Itertools;
 use common::{CaseEntrypointFn, PartNumber};
 use env_logger::Env;
 use libloading::{Library, Symbol};
@@ -7,8 +8,9 @@ use std::env::args;
 use std::path::PathBuf;
 use std::process::{Command, ExitCode};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Args {
+    /// 0 for all
     pub day: u32,
     pub year: u32,
     /// All parts if not set
@@ -20,19 +22,34 @@ pub struct Args {
 fn do_main() -> Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
-    let args = Args::parse()?;
+    let mut args = Args::parse()?;
 
     info!("lets go: {args:?}");
 
-    let input = format!("inputs/{}-{:02}", args.year, args.day);
-    info!("reading input from {input}");
+    let days = if args.day == 0 {
+        (1..=25).collect_vec()
+    } else {
+        vec![args.day]
+    };
 
-    let input = std::fs::read_to_string(&input)
-        .with_context(|| format!("Failed to read input from {input}"))?;
+    for day in days {
+        args.day = day;
+        let input = format!("inputs/{}-{:02}", args.year, args.day);
+        info!("reading input from {input}");
 
-    ensure_solution_built(&args).context("Failed to ensure solution is built")?;
+        let do_it = || {
+            let input = std::fs::read_to_string(&input)
+                .with_context(|| format!("Failed to read input from {input}"))?;
 
-    run_solution(args, input.trim_end())?;
+            ensure_solution_built(&args).context("Failed to ensure solution is built")?;
+
+            run_solution(args.clone(), input.trim_end())
+        };
+
+        if let Err(e) = do_it() {
+            error!("failed to run for day {day}: {e:#}");
+        }
+    }
     Ok(())
 }
 
@@ -145,7 +162,7 @@ fn run_solution(args: Args, input: &str) -> Result<()> {
 impl Args {
     pub fn parse() -> Result<Self> {
         let mut args = args().skip(1);
-        let mut day = None;
+        let mut day = 0;
         let mut year = None;
         let mut part = None;
         let mut only_solutions = false;
@@ -154,12 +171,11 @@ impl Args {
         while let Some(arg) = args.next() {
             match arg.as_str() {
                 "--day" => {
-                    day = Some(
-                        args.next()
-                            .context("--day requires a number")?
-                            .parse()
-                            .context("day must be a valid number")?,
-                    );
+                    day = args
+                        .next()
+                        .context("--day requires a number")?
+                        .parse()
+                        .context("day must be a valid number")?;
                 }
                 "--year" => {
                     year = Some(
@@ -189,7 +205,7 @@ impl Args {
         }
 
         Ok(Args {
-            day: day.context("--day is required")?,
+            day,
             year: year.context("--year is required")?,
             part,
             only_solutions,
