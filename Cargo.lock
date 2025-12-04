@@ -114,7 +114,7 @@ name = "aoc-2015-03"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ name = "aoc-2015-06"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -189,7 +189,7 @@ name = "aoc-2024-08"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -204,7 +204,7 @@ name = "aoc-2024-10"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -225,7 +225,7 @@ version = "0.1.0"
 dependencies = [
  "common",
  "geo",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -241,7 +241,7 @@ name = "aoc-2024-14"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -249,7 +249,7 @@ name = "aoc-2024-15"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
 ]
 
 [[package]]
@@ -257,7 +257,7 @@ name = "aoc-2024-16"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
  "pathfinding",
 ]
 
@@ -274,7 +274,7 @@ name = "aoc-2024-18"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
  "pathfinding",
 ]
 
@@ -291,7 +291,7 @@ name = "aoc-2024-20"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
  "hashbrown 0.15.2",
  "pathfinding",
 ]
@@ -301,7 +301,7 @@ name = "aoc-2024-21"
 version = "0.1.0"
 dependencies = [
  "common",
- "glam",
+ "glam 0.29.2",
  "pathfinding",
 ]
 
@@ -353,6 +353,14 @@ name = "aoc-2025-03"
 version = "0.1.0"
 dependencies = [
  "common",
+]
+
+[[package]]
+name = "aoc-2025-04"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "glam 0.30.9",
 ]
 
 [[package]]
@@ -576,6 +584,12 @@ name = "glam"
 version = "0.29.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc46dd3ec48fdd8e693a98d2b8bafae273a2d54c1de02a2a7e3d57d501f39677"
+
+[[package]]
+name = "glam"
+version = "0.30.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd47b05dddf0005d850e5644cae7f2b14ac3df487979dbfff3b56f20b1a6ae46"
 
 [[package]]
 name = "hash32"
@@ -842,9 +856,9 @@ checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "rayon"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b418a60154510ca1a002a752ca9714984e21e4241e804d32555251faf8b78ffa"
+checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
 dependencies = [
  "either",
  "rayon-core",
@@ -852,9 +866,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.12.1"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
+checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
