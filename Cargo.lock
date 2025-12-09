@@ -394,6 +394,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc-2025-09"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "geo",
+ "glam 0.30.9",
+ "rayon",
+]
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
