@@ -1,0 +1,13 @@
+[package]
+name = "aoc-2025-10"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+common = { path = "../../common" }
+pathfinding = "4.14"
+smallvec = "2.0.0-alpha.12"
+good_lp = { version = "1.14", default-features = false, features = ["minilp"] }
